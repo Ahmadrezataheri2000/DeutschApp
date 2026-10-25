@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="fa" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>اعداد آلمانی · Zahlen</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#faf6f0;--fg:#1f1b16;--card:#fff;--mut:#7a6f62;--ac:#c2410c;--ok:#15803d;--bad:#b91c1c;--bd:#e7dccb;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17130f;--fg:#f3ece2;--card:#241e18;--mut:#a89c8b;--ac:#fb923c;--ok:#4ade80;--bad:#f87171;--bd:#3a3128}}
+:root[data-theme="dark"]{--bg:#17130f;--fg:#f3ece2;--card:#241e18;--mut:#a89c8b;--ac:#fb923c;--ok:#4ade80;--bad:#f87171;--bd:#3a3128}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 Vazirmatn,Tahoma,system-ui,sans-serif}
+.w{max-width:760px;margin:0 auto;padding:14px}
+h1{font-size:22px;margin:4px 0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.st{color:var(--mut);font-size:14px}
+button,select,input{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:8px 14px;cursor:pointer}
+button:hover{border-color:var(--ac)}
+.on,.pri{background:var(--ac);color:#fff;border-color:var(--ac)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.scroll{overflow-x:auto;white-space:nowrap;padding-bottom:4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:10px 0}
+.c{display:flex;flex-direction:column;align-items:center;padding:12px 8px;text-align:center}
+.c b{font-size:22px}.c span{color:var(--mut);font-size:14px;word-break:break-word}
+.tip,.box{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px 14px;margin:10px 0}
+.de{direction:ltr;unicode-bidi:isolate;font-weight:700}
+.big{font-size:20px;padding:12px 20px}
+.num{font-size:44px;font-weight:700;text-align:center;direction:ltr;margin:6px 0}
+.words{font-size:22px;text-align:center;direction:ltr;margin:8px 0;word-break:break-word}
+input#in{width:100%;font-size:26px;text-align:center;direction:ltr;margin:8px 0}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+.soon{opacity:.55;cursor:default}
+.hero{text-align:center;padding:26px 8px}
+.hero .num{font-size:60px}
+a{color:var(--ac)}
+</style></head><body><div class="w">
+<div class="top"><h1>🇩🇪 اعداد آلمانی</h1><div class="st"><span id="st"></span> <select id="vs" aria-label="صدا"></select></div></div>
+<div id="bar" hidden>
+<div class="row scroll" id="tabs"></div>
+<div class="row scroll" id="chips"></div></div>
+<div id="v"></div>
+<p class="st">رایگان، بدون ثبت‌نام، همیشه آنلاین. پیشرفت فقط روی دستگاه خودت ذخیره می‌شود.</p>
+</div>
+<script>
+const B=['null','eins','zwei','drei','vier','fünf','sechs','sieben','acht','neun','zehn','elf','zwölf','dreizehn','vierzehn','fünfzehn','sechzehn','siebzehn','achtzehn','neunzehn'],
+T=['','','zwanzig','dreißig','vierzig','fünfzig','sechzig','siebzig','achtzig','neunzig'];
+const b100=(n,f)=>n<20?(n==1&&!f?'ein':B[n]):(n%10?(n%10==1?'ein':B[n%10])+'und':'')+T[n/10|0];
+const b1k=(n,f)=>{const h=n/100|0,r=n%100,s=h?(h==1?'ein':B[h])+'hundert':'';return s+(r?b100(r,f):'')};
+function w(n){if(n===0)return'null';const bn=Math.floor(n/1e9),m=Math.floor(n/1e6)%1000,t=Math.floor(n/1e3)%1000,r=n%1000,o=[];
+if(bn)o.push(bn==1?'eine Milliarde':b1k(bn,false)+' Milliarden');
+if(m)o.push(m==1?'eine Million':b1k(m,false)+' Millionen');
+let x='';if(t)x+=(t==1?'ein':b1k(t,false))+'tausend';if(r)x+=b1k(r,true);if(x)o.push(x);return o.join(' ')}
+const yw=y=>y<2000?b100(y/100|0,false)+'hundert'+(y%100?b100(y%100,true):''):w(y);
+const f=n=>n.toLocaleString('de-DE');
+const R=[[0,20],[21,100],[101,999],[1000,99999],[100000,999999999],[1e9,99e9]];
+const LB=['۰–۲۰','۲۱–۱۰۰','۱۰۱–۹۹۹','هزارها','میلیون‌ها','میلیارد‌ها'];
+const TIPS=[
+'۰ تا ۱۲ را حفظ کن. ۱۳ تا ۱۹ = رقم + zehn (dreizehn). دو استثنا: sechs ← sechzehn و sieben ← siebzehn کوتاه می‌شوند.',
+'ترتیب وارونه است: اول یکان، بعد und، بعد دهگان. einundzwanzig یعنی «یک‌و‌بیست». موقع شنیدن، رقم اول را نگه دار و بعد دهگان را کنارش بگذار. dreißig با ß نوشته می‌شود و sechzig و siebzig کوتاه‌اند.',
+'hundert + بقیه، بدون und در وسط: 342 = dreihundertzweiundvierzig. فقط داخل دوتای آخر und می‌آید.',
+'tausend به بقیه می‌چسبد: 48.372 = achtundvierzigtausenddreihundertzweiundsiebzig. در آلمانی نقطه جداکننده هزارگان است، نه ممیز.',
+'Million جدا نوشته می‌شود و مؤنث است: eine Million، zwei Millionen. عدد را سه‌رقم‌سه‌رقم از راست ببُر و هر بلوک را جدا بشنو.',
+'Milliarde آلمانی = ۱۰⁹ (همان billion انگلیسی). Billion آلمانی = ۱۰¹² (trillion انگلیسی). مراقب باش!'];
+const S={t:'home',L:0,k:'price',streak:0,xp:0};
+try{S.xp=+localStorage.getItem('zxp')||0}catch(e){}
+const $=s=>document.querySelector(s);let H={};
+const W=(()=>{try{return JSON.parse(localStorage.getItem('zw'))||{}}catch(e){return{}}})();
+function wk(n,bad){if(bad)W[n]=2;else if(W[n]&&--W[n]<=0)delete W[n];try{localStorage.setItem('zw',JSON.stringify(W))}catch(e){}}
+function rnd(L=S.L){const[a,b]=R[L];const k=Object.keys(W).map(Number).filter(x=>x>=a&&x<=b);if(k.length&&Math.random()<.4)return k[Math.floor(Math.random()*k.length)];if(L<2)return a+Math.floor(Math.random()*(b-a+1));
+return Math.floor(Math.exp(Math.log(a)+Math.random()*(Math.log(b)-Math.log(a))))}
+const rr=n=>Math.floor(Math.random()*n);
+const RK=[[0,'تازه‌کار 🌱'],[100,'شاگرد 📘'],[300,'کاوشگر 🧭'],[700,'حرفه‌ای 🎯'],[1500,'استاد اعداد 🏅'],[3000,'افسانه 👑']],G=20;
+const D=(()=>{try{return JSON.parse(localStorage.getItem('zd'))||{}}catch(e){return{}}})();let lx=S.xp;
+function upd(){const t=new Date().toLocaleDateString('sv'),y=new Date(Date.now()-864e5).toLocaleDateString('sv');if(D.d!=t){D.d=t;D.n=0}
+if(S.xp>lx){D.n++;if(D.n==G){D.s=(D.l==y?(D.s||0):0)+1;D.l=t}}lx=S.xp;
+const ds=D.l==t||D.l==y?D.s||0:0,rk=RK.filter(r=>S.xp>=r[0]).pop()[1];
+$('#st').textContent=`${rk} · ⭐ ${S.xp} · 📅 ${ds} · 🎯 ${Math.min(D.n,G)}/${G}${D.n>=G?' ✅':''}`;
+try{localStorage.setItem('zxp',S.xp);localStorage.setItem('zd',JSON.stringify(D))}catch(e){}}
+/* Stimme */
+let VS=[],VO=null;
+function lv(){try{VS=speechSynthesis.getVoices().filter(v=>/^de/i.test(v.lang))}catch(e){return}
+const p=VS.find(v=>/natural|neural|premium|enhanced|online/i.test(v.name))||VS.find(v=>/google/i.test(v.name))||VS[0];
+if(!VO||!VS.includes(VO))VO=p;$('#vs').innerHTML=VS.map((v,i)=>`<option value="${i}" ${v===VO?'selected':''}>${v.name}</option>`).join('')||'<option>صدای آلمانی پیدا نشد</option>'}
+try{speechSynthesis.onvoiceschanged=lv;lv()}catch(e){}
+$('#vs').onchange=e=>{VO=VS[+e.target.value];say('Guten Tag! Hallo!')};
+function say(t,slow){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='de-DE';if(VO)u.voice=VO;u.rate=slow?.65:.92;speechSynthesis.speak(u)}catch(e){}}
+/* Mikrofon */
+const nz=s=>s.toLowerCase().replace(/ß/g,'ss').replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/[^a-z0-9]/g,'');
+const cn=s=>nz(s).replace(/eins|eine|ein/g,'E').replace(/E(?=hundert|tausend)/g,'');
+function mt(a,n){const d=a.replace(/[.\s]/g,'');if(/^\d+$/.test(d))return+d===n;
+const t=a.replace(/\d[\d.]*/g,m=>' '+w(+m.replace(/\./g,''))+' ');return cn(t)===cn(w(n))}
+function mic(cb){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return cb(null,'unsupported');
+const r=new SR();r.lang='de-DE';r.maxAlternatives=6;r.onresult=e=>cb(Array.from(e.results[0]).map(x=>x.transcript));
+r.onerror=e=>cb(null,e.error);r.onnomatch=()=>cb([]);try{r.start()}catch(e){cb(null,'err')}}
+/* Navigation */
+const TABS=[['learn','یادگیری'],['hear','شنیداری'],['speak','گفتاری'],['blitz','برق‌آسا'],['life','زندگی واقعی'],['sent','جمله‌ها'],['exam','آزمون'],['video','ویدیو']];
+$('#tabs').innerHTML='<button data-a="home">🏠</button>'+TABS.map(t=>`<button data-a="tab" data-v="${t[0]}">${t[1]}</button>`).join('');
+$('#chips').innerHTML=LB.map((l,i)=>`<button data-a="lvl" data-v="${i}">${l}</button>`).join('');
+document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el)return;const a=el.dataset.a;
+if(a=='tab'){S.t=el.dataset.v;render()}else if(a=='home'){S.t='home';render()}else if(a=='lvl'){S.L=+el.dataset.v;render()}
+else if(a=='go'){S.t='learn';render()}else if(H[a])H[a](el)});
+function render(){H={};const h=S.t=='home';$('#bar').hidden=h;
+document.querySelectorAll('#tabs [data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v==S.t));
+document.querySelectorAll('#chips button').forEach((b,i)=>b.classList.toggle('on',i==S.L));
+$('#chips').hidden=['life','sent'].includes(S.t);upd();V[S.t]()}
+const V={};
+V.home=()=>{$('#v').innerHTML=`<div class="hero"><div class="num">1 · 2 · 3</div><p>اول از همه اعداد را کامل یاد می‌گیریم؛ از ۰ تا میلیاردها.<br>هدف روزانه: ۲۰ پاسخ درست 🎯 و هر روز که برسی، سری روزهایت بیشتر می‌شود.</p></div>
+<div class="grid"><button class="c pri" data-a="go"><b>اعداد</b><span style="color:#fff" class="de">Zahlen</span></button>
+${['ساعت و تاریخ','الفبا و تلفظ','فعل‌ها','مکالمه روزمره'].map(x=>`<div class="c tip soon"><b style="font-size:17px">${x}</b><span>به‌زودی</span></div>`).join('')}</div>`};
+V.learn=()=>{const it=S.L==0?Array.from({length:21},(_,i)=>i):Array.from({length:12},()=>rnd());
+$('#v').innerHTML=`<div class="tip">${TIPS[S.L]}</div><div class="grid">${it.map(n=>`<button class="c" data-a="say" data-n="${n}"><b>${f(n)}</b><span class="de">${w(n)}</span></button>`).join('')}</div>${S.L?'<button data-a="more">🔄 نمونه‌های جدید</button>':''}`;
+H.say=el=>say(w(+el.dataset.n));H.more=render};
+function typeMode(gen,pre=''){let q=gen();
+$('#v').innerHTML=pre+`<div class="box"><div id="ask" class="st">${q.ask||''}</div>${q.ask?'<button data-a="mc">🎤 جمله را بلند تکرار کن</button>':''}<div class="row"><button class="big pri" data-a="p">🔊 بشنو</button><button data-a="sl">🐢 آهسته</button></div>
+<input id="in" inputmode="numeric" autocomplete="off" placeholder="آنچه شنیدی را بنویس"><div class="row"><button class="pri" data-a="ok">بررسی</button><button data-a="rev">نمایش جواب</button></div><div id="fb" class="words"></div></div>`;
+const nx=()=>{q=gen();$('#ask').textContent=q.ask||'';$('#in').value='';$('#fb').innerHTML='';say(q.say)};
+H.p=()=>say(q.say);H.sl=()=>say(q.say,1);
+H.rev=()=>{S.streak=0;if(S.t=='hear')wk(+q.ans,1);upd();$('#fb').innerHTML=`${q.show}<br><small>${q.say}</small>`};
+H.ok=()=>{const ok=$('#in').value.replace(/\D/g,'')===q.ans;if(S.t=='hear')wk(+q.ans,!ok);
+if(ok){S.streak++;S.xp+=10;upd();$('#fb').innerHTML=`<span class="ok">✓ آفرین!</span><br>${q.show}<br><small>${q.say}</small>`;setTimeout(nx,1800)}
+else{S.streak=0;upd();$('#fb').innerHTML='<span class="bad">✗ دوباره گوش بده</span>'}};
+H.mc=()=>{$('#fb').textContent='در حال گوش دادن…';mic((a,err)=>{const fb=$('#fb');if(!a)return fb.innerHTML='<small class="bad">میکروفون در دسترس نیست</small>';
+const tw=s=>s.toLowerCase().replace(/\d[\d.]*/g,m=>' '+w(+m.replace(/\./g,''))+' ').replace(/[^a-zäöüß ]/g,' ').split(/\s+/).filter(Boolean);
+const T=tw(q.say);let best=0,b=a[0]||'';a.forEach(x=>{const A=tw(x),p=T.filter(y=>A.includes(y)).length/T.length;if(p>best){best=p;b=x}});
+if(best>=.8){S.streak++;S.xp+=10;upd();fb.innerHTML=`<span class="ok">✓ عالی گفتی! ${Math.round(best*100)}٪</span>`}
+else{S.streak=0;upd();fb.innerHTML=`<span class="bad">✗ ${Math.round(best*100)}٪</span><br><small>شنیدم: ${b||'—'}</small>`}})};
+$('#in').onkeydown=e=>{if(e.key=='Enter')H.ok()};say(q.say)}
+V.hear=()=>typeMode(()=>{const n=rnd();return{say:w(n),ans:String(n),show:f(n)}});
+const pad=n=>String(n).padStart(2,'0');
+const KIND={price:()=>{const e=1+rr(S.L>2?9999:199),c=[0,50,99,5,20,75,10][rr(7)];return{say:w(e)+' Euro'+(c?' '+w(c):''),ans:String(e)+(c?pad(c):''),show:e+','+pad(c)+' €'}},
+phone:()=>{let s='0'+(150+rr(800));for(let i=0;i<7;i++)s+=rr(10);const P=x=>x[0]=='0'?'null '+B[+x[1]]:w(+x);
+return{say:[...s.slice(0,4)].map(d=>B[+d]).join(' ')+', '+(s.slice(4).match(/.{1,2}/g)||[]).map(P).join(', '),ans:s,show:s}},
+year:()=>{const y=1900+rr(131);return{say:yw(y),ans:String(y),show:String(y)}},
+time:()=>{const h=rr(24),m=[0,5,10,15,20,30,45,rr(60)][rr(8)];return{say:w(h)+' Uhr'+(m?' '+w(m):''),ans:pad(h)+pad(m),show:pad(h)+':'+pad(m)}}};
+V.life=()=>{const K=[['price','قیمت €'],['phone','تلفن'],['year','سال'],['time','ساعت']];
+const pre=`<div class="row">${K.map(k=>`<button data-a="k" data-v="${k[0]}" class="${S.k==k[0]?'on':''}">${k[1]}</button>`).join('')}</div>`;
+typeMode(()=>KIND[S.k](),pre);H.k=el=>{S.k=el.dataset.v;V.life()}};
+V.speak=()=>{let n=rnd(),sw=false;
+const draw=()=>{$('#v').innerHTML=`<div class="box"><div class="num">${f(n)}</div><div class="words">${sw?w(n):'…'}</div>
+<div class="row"><button class="big pri" data-a="m">🎤 بگو</button><button data-a="h">💡 نمایش کلمات</button><button data-a="p">🔊 نمونه</button><button data-a="n">بعدی ⏭</button></div><div id="fb" class="words"></div></div>`};draw();
+H.p=()=>say(w(n));H.h=()=>{sw=true;draw()};H.n=()=>{n=rnd();sw=false;draw()};
+H.m=()=>{$('#fb').textContent='در حال گوش دادن…';mic((a,err)=>{const fb=$('#fb');
+if(!a)return fb.innerHTML=`<small class="bad">${err=='unsupported'?'این مرورگر تشخیص گفتار ندارد. Chrome، Edge یا Safari را امتحان کن.':'میکروفون در دسترس نیست ('+err+'). اجازهٔ میکروفون را بده یا لینک را در یک تب جدا باز کن.'}</small>`;
+if(!a.length)return fb.innerHTML='<span class="bad">چیزی نشنیدم</span>';
+const g=a.some(x=>mt(x,n));wk(n,!g);if(g){S.streak++;S.xp+=15;upd();fb.innerHTML=`<span class="ok">✓ درست گفتی!</span><br><small>${a[0]}</small>`;setTimeout(H.n,1500)}
+else{S.streak=0;upd();fb.innerHTML=`<span class="bad">✗ شنیدم:</span> ${a[0]}<br><small>درست: ${w(n)}</small>`}})}};
+V.blitz=()=>{let n=rnd(),opts;
+const mk=()=>{n=rnd();const s=String(n),c=new Set([n+1,n-1,n+10,n-10,n+100,n*10]);
+if(s.length>1){const i=rr(s.length-1);c.add(+(s.slice(0,i)+s[i+1]+s[i]+s.slice(i+2)))}
+const d=[...c].filter(x=>x>=0&&x!=n&&x<1e12).sort(()=>Math.random()-.5).slice(0,3);while(d.length<3){const x=n+2+rr(9);if(!d.includes(x))d.push(x)}
+opts=[n,...d].sort(()=>Math.random()-.5)};
+const draw=()=>{$('#v').innerHTML=`<div class="box"><div class="words" style="font-size:26px">${w(n)}</div><div class="row"><button data-a="p">🔊</button></div>
+<div class="grid">${opts.map(o=>`<button class="c" data-a="pick" data-n="${o}"><b>${f(o)}</b></button>`).join('')}</div><div id="fb" class="words"></div></div>`;say(w(n))};
+mk();draw();H.p=()=>say(w(n));
+H.pick=el=>{wk(n,+el.dataset.n!==n);if(+el.dataset.n===n){S.streak++;S.xp+=5;upd();$('#fb').innerHTML='<span class="ok">✓</span>';setTimeout(()=>{mk();draw()},700)}
+else{S.streak=0;upd();$('#fb').innerHTML='<span class="bad">✗ دوباره</span>'}}};
+const eu=e=>e==1?'ein':w(e);
+const SC=[
+()=>{const e=1+rr(60),c=[0,20,50,90,99,45][rr(6)];return{ask:'🛒 در سوپرمارکت؛ مبلغ را بنویس (یورو و سنت)',say:`Das macht zusammen ${eu(e)} Euro${c?' '+w(c):''}, bitte.`,ans:String(e)+(c?pad(c):''),show:e+','+pad(c)+' €'}},
+()=>{const n=101+rr(540);return{ask:'🏨 در هتل؛ شمارهٔ اتاق',say:`Ihr Zimmer hat die Nummer ${w(n)}. Der Aufzug ist rechts.`,ans:String(n),show:String(n)}},
+()=>{const h=rr(24),m=[0,5,10,15,20,25,35,40,45,50,55][rr(11)];return{ask:'🚆 در ایستگاه؛ ساعت حرکت قطار (مثلاً ۱۴۳۰)',say:`Der Zug fährt um ${w(h)} Uhr${m?' '+w(m):''} auf Gleis ${w(1+rr(12))} ab.`,ans:pad(h)+pad(m),show:pad(h)+':'+pad(m)}},
+()=>{const p=String(10000+rr(89999));return{ask:'📮 در اداره؛ کد پستی (۵ رقم)',say:`Ihre Postleitzahl ist ${[...p].map(d=>B[+d]).join(' ')}, richtig?`,ans:p,show:p}},
+()=>{const k=12+rr(880);return{ask:'🚗 مسافرت؛ فاصله به کیلومتر',say:`Bis dahin sind es noch ${w(k)} Kilometer.`,ans:String(k),show:k+' km'}},
+()=>{const n=1+rr(199);return{ask:'🏢 در اداره؛ شمارهٔ نوبت',say:`Sie haben die Nummer ${w(n)}. Bitte warten Sie.`,ans:String(n),show:String(n)}}];
+V.sent=()=>typeMode(()=>SC[rr(SC.length)]());
+const opt=n=>{const s=String(n),c=new Set([n+1,n-1,n+10,n-10,n*10]);if(s.length>1){const i=rr(s.length-1);c.add(+(s.slice(0,i)+s[i+1]+s[i]+s.slice(i+2)))}
+const d=[...c].filter(x=>x>=0&&x!=n&&x<1e12).sort(()=>Math.random()-.5).slice(0,3);while(d.length<3){const x=n+2+rr(9);if(!d.includes(x))d.push(x)}return[n,...d].sort(()=>Math.random()-.5)};
+V.exam=()=>{let i=0,sc=0,n,m,o,bt=0;try{bt=+localStorage.getItem('zb'+S.L)||0}catch(e){}
+const nq=()=>{if(i>=10)return end();n=rnd();m=i%2;o=opt(n);
+$('#v').innerHTML=`<div class="box"><div class="st">سؤال ${i+1} از ۱۰ · امتیاز ${sc}</div>${m?`<div class="words" style="font-size:26px">${w(n)}</div><button data-a="p">🔊</button>`:'<button class="big pri" data-a="p">🔊 بشنو</button>'}<div class="grid">${o.map(x=>`<button class="c" data-a="pick" data-n="${x}"><b>${f(x)}</b></button>`).join('')}</div></div>`;if(!m)say(w(n))};
+const end=()=>{S.xp+=sc*3;if(sc>bt){bt=sc;try{localStorage.setItem('zb'+S.L,sc)}catch(e){}}upd();
+$('#v').innerHTML=`<div class="hero"><div class="num">${sc}/10</div><p>${sc>=9?'عالی! تقریباً بی‌نقص 🏆':sc>=7?'خیلی خوب 👏':sc>=5?'قابل قبول؛ دوباره امتحان کن':'بیشتر تمرین کن، پیشرفت می‌کنی 💪'}</p><p class="st">بهترین نمرهٔ این سطح: ${bt}/10</p><button class="pri" data-a="again">دوباره</button></div>`};
+H.p=()=>say(w(n));H.again=()=>{i=0;sc=0;nq()};
+H.pick=el=>{const g=+el.dataset.n===n;if(g)sc++;wk(n,!g);i++;nq()};nq()};
+V.video=()=>{const it=S.L==0?[0,1,2,3,5,7,12,17,20]:Array.from({length:8},()=>rnd());
+$('#v').innerHTML=`<div class="tip">برای هر عدد، لینک YouGlish جمله‌های واقعی از ویدیوهای یوتیوب با گویشور آلمانی‌زبان را نشان می‌دهد (عدد را همان‌طور که واقعاً در حرف زدن می‌آید می‌شنوی). ویدیوها از سایت خودشان پخش می‌شوند و داخل این صفحه جاسازی نمی‌شوند.</div>
+<div class="grid">${it.map(n=>{const x=w(n).split(' ')[0];return`<div class="c tip"><b>${f(n)}</b><span class="de">${w(n)}</span>
+<a target="_blank" rel="noopener" href="https://youglish.com/pronounce/${encodeURIComponent(x)}/german">▶ سکانس‌های واقعی</a>
+<a target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${encodeURIComponent(w(n)+' deutsch')}">یوتیوب</a></div>`}).join('')}</div><button data-a="more">🔄 عددهای دیگر</button>`;H.more=render};
+render();
+</script></body></html>
